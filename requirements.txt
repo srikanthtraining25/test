@@ -1,0 +1,5 @@
+langgraph>=0.2.29
+langchain-core>=0.2.40
+pydantic>=2.7
+streamlit>=1.37
+rich>=13.7
