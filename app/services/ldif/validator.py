@@ -1,7 +1,10 @@
+"""LDIF validation functions."""
 import re
+from typing import TYPE_CHECKING
 
-class ValidationError(Exception):
-    pass
+if TYPE_CHECKING:
+    from .models import LDAPEntry
+
 
 def validate_dn(dn: str) -> bool:
     """
@@ -49,6 +52,7 @@ def validate_dn(dn: str) -> bool:
             
     return True
 
+
 def validate_attribute_name(name: str) -> bool:
     """
     Validates an attribute name (descriptors).
@@ -59,23 +63,30 @@ def validate_attribute_name(name: str) -> bool:
     pattern = r'^[a-zA-Z][a-zA-Z0-9-]*$'
     return bool(re.match(pattern, name))
 
-def validate_entry(entry) -> None:
+
+def validate_entry(entry: "LDAPEntry") -> None:
     """
-    Validates a model entry.
+    Validate an LDAP entry.
+    
+    Args:
+        entry: The LDAP entry to validate
+        
+    Raises:
+        ValueError: If the entry is invalid
     """
     if not validate_dn(entry.dn):
-        raise ValidationError(f"Invalid DN: {entry.dn}")
+        raise ValueError(f"Invalid DN: {entry.dn}")
     
     for obj_class in entry.object_classes:
         # object class names follow OID or keystring rules. We assume keystring for names.
         if not validate_attribute_name(obj_class):
-             raise ValidationError(f"Invalid objectClass: {obj_class}")
+             raise ValueError(f"Invalid objectClass: {obj_class}")
              
     for attr_name, values in entry.attributes.items():
         if not validate_attribute_name(attr_name):
-            raise ValidationError(f"Invalid attribute name: {attr_name}")
+            raise ValueError(f"Invalid attribute name: {attr_name}")
             
         # We assume values are strings. If they are binary, they should be bytes.
         # Implementation detail: we'll check if list.
         if not isinstance(values, list):
-             raise ValidationError(f"Attribute {attr_name} values must be a list")
+             raise ValueError(f"Attribute {attr_name} values must be a list")

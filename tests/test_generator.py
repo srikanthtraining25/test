@@ -1,7 +1,6 @@
 import unittest
-from src.models import User, Group, OU, LDAPEntry
-from src.generator import LDIFGenerator
-from src.validator import ValidationError
+from app.services.ldif.models import User, Group, OU, LDAPEntry
+from app.services.ldif.generator import LDIFGenerator
 
 class TestLDIFGenerator(unittest.TestCase):
 
@@ -97,7 +96,7 @@ class TestLDIFGenerator(unittest.TestCase):
         # We manually construct LDAPEntry to bypass User constructor checks if any (User constructor forces structure)
         entry = LDAPEntry(rdn="invalid", parent_dn="", object_classes=[])
         
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValueError):
             LDIFGenerator.generate(entry)
 
     def test_multi_valued_attributes(self):
